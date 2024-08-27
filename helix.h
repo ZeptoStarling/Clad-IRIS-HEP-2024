@@ -5,7 +5,8 @@
 #include "equations.h"
 #include "distance.h"
 
-inline void HelixPoint(double a, double b, double c, double d, double alph, double bet, double t, double output[3]) {
+inline void HelixPoint(double a, double b, double c, double d, double alph, double bet, double t, double output[3])
+{
 	double x = a * (c + std::cos(t));
 	double y = a * (d + std::sin(t));
 	double z = a * b * t;
@@ -15,9 +16,10 @@ inline void HelixPoint(double a, double b, double c, double d, double alph, doub
 	Rotate(x, y, z, alph, bet, output);
 }
 
-inline double HelixClosestTime(double a, double b, double c, double d, double alph, double bet, double x, double y, double z) {
-	constexpr auto MY_PI = std::numbers::pi_v<double>;
-	double point[3] = {x, y, z};
+inline double HelixClosestTime(double a, double b, double c, double d, double alph, double bet, double x, double y, double z)
+{
+	auto MY_PI = std::numbers::pi_v<double>;
+	double point[3];
 	UnRotate(x, y, z, alph, bet, point);
 	point[0] /= a;
 	point[1] /= a;
@@ -29,7 +31,7 @@ inline double HelixClosestTime(double a, double b, double c, double d, double al
 	double C = b * b;
 	double D = -point[2] * b;
 
-	PrintSinPlusLin(A, B, C, D);
+	// PrintSinPlusLin(A, B, C, D);
 	double mi = point[2] / b - MY_PI;
 	double ma = point[2] / b + MY_PI;
 	double t1 = SolveSinPlusLin(A, B, C, D, mi, ma);
@@ -38,10 +40,12 @@ inline double HelixClosestTime(double a, double b, double c, double d, double al
 	HelixPoint(a, b, c, d, alph, bet, ans, point);
 	double dist = DistanceSquareA(point, x, y, z);
 
-	for (double t = mi; t < ma;) {
+	for (double t = mi; t < ma; t = t)
+	{
 		double ttt = NextSinPlusInflection(A, B, C, t);
 
-		if (ttt == t) {
+		if (ttt == t)
+		{
 			break;
 		}
 
@@ -50,7 +54,8 @@ inline double HelixClosestTime(double a, double b, double c, double d, double al
 		HelixPoint(a, b, c, d, alph, bet, cur, point);
 		double dist2 = DistanceSquareA(point, x, y, z);
 
-		if (dist2 < dist) {
+		if (dist2 < dist)
+		{
 			dist = dist2;
 			ans = cur;
 		}
