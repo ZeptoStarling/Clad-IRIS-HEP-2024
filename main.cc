@@ -14,4 +14,5 @@ int main()
 		std::cerr << points[i][0] << " " << points[i][1] << " " << points[i][2] << std::endl;
 	}
 	LevenbergMarquardt(points, N);
+	GradientDescent(points, N);
 }

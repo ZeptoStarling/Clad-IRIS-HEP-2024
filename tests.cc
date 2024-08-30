@@ -181,6 +181,11 @@ void TestDistancesToPoints()
     std::cout << "Distances to all points: " << std::endl;
     for (int i = 0; i < 10; i++)
     {
+        std::cout << dist[i] << std::endl;
+    }
+    std::cout << "done\n";
+}
+    {
         for (int j = 0; j < 3; j++)
         {
             std::cout << dist[i * 3 + j] << " ";

@@ -142,7 +142,8 @@ inline void ForwardElim(double input[6][6], double *res, double output[6][6])
     }
 
     // TO DO. Take this out
-    std::cerr << "Forward elimination result:" << std::endl;
+    std::cerr << "Forward elimination results:" << std::endl;
+    std::cerr << "Left side:" << std::endl;
     for (int j = 0; j < 6; j++)
     {
         for (int k = 0; k < 6; k++)
@@ -151,6 +152,12 @@ inline void ForwardElim(double input[6][6], double *res, double output[6][6])
         }
         std::cerr << std::endl;
     }
+    std::cerr << "Right side:" << std::endl;
+    for (int k = 0; k < 6; k++)
+    {
+        std::cerr << res[k] << " ";
+    }
+    std::cerr << std::endl;
 }
 
 void BackSub(double input[6][6], double *right_side, double *results)

@@ -41,14 +41,14 @@ double DistanceToPoint(double a, double b, double c, double d, double alph, doub
 void DistancesToAllPoints(double *points, int N, double a, double b, double c, double d, double alph, double bet, double *dist)
 {
     int n = 0;
-    for (int i = 0; i < N * 3; i += 3)
+    for (int i = 0; i < N; i++)
     {
-        double x = points[i];
-        double y = points[i + 1];
-        double z = points[i + 2];
+        double x = points[i * 3];
+        double y = points[i * 3 + 1];
+        double z = points[i * 3 + 2];
         double t = HelixClosestTime(a, b, c, d, alph, bet, x, y, z);
         dist[n] = DistanceToPoint(a, b, c, d, alph, bet, t, x, y, z);
-        dist[n] += 0.001 * (std::abs(a) + std::abs(b) + std::abs(c) + std::abs(d) + std::abs(alph) + std::abs(bet));
+        dist[n] += 0.001 * (std::sqrt(a * a) + std::sqrt(b * b) + std::sqrt(c * c) + std::sqrt(d * d) + std::sqrt(alph * alph) + std::sqrt(bet * bet));
         n++;
     }
 }
@@ -56,7 +56,6 @@ void Jacobian(double points[][3], int N, double a, double b, double c, double d,
 {
     /*Construct the N x 6 Jacobian.*/
     auto dist_grad = clad::gradient(DistanceToPoint, "a, b, c, d, alph, bet");
-
     for (int i = 0; i < N; i++)
     {
         double x = points[i][0];
@@ -74,6 +73,77 @@ void Jacobian(double points[][3], int N, double a, double b, double c, double d,
     }
 }
 
+void GradientDescent(double points[][3], int N)
+{
+    // double a = 4.2122, b = -3.79395, c = -25.40835, d = -3.207055, alph = -2.60384, bet = 1.13255;
+    // double a = 5.2122, b = -4.79395, c = -26.40835, d = -4.207055, alph = -3.60384, bet = 1.13255;
+    double a = 5.2122, b = -4.79395, c = -26, d = -4.207055, alph = -3.60384, bet = 1.13255;
+
+    double alpha = 1;
+    double points1D[N * 3];
+    double jacobian[N][6];
+    double jacobian1D[N * 6];
+    double tjacobian[6 * N];
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            points1D[i * 3 + j] = points[i][j];
+        }
+    }
+    double dist[N];
+    DistancesToAllPoints(points1D, N, a, b, c, d, alph, bet, dist);
+    double square_err = 0;
+    for (int i = 0; i < N; i++)
+    {
+        square_err += (dist[i] * dist[i]);
+    }
+    for (int i = 0; i < 100; i++)
+    {
+        Jacobian(points, N, a, b, c, d, alph, bet, jacobian);
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                jacobian1D[i * 6 + j] = jacobian[i][j];
+            }
+        }
+        Transpose(jacobian1D, N, 6, tjacobian);
+        double y_dist[N];
+        ScalarMultiply(dist, N, 1, -1, y_dist);
+        double h[6];
+        double jt_and_step[N];
+        ScalarMultiply(tjacobian, 6, N, alpha, jt_and_step);
+        MatrixMultiply(jt_and_step, y_dist, 6, N, 1, h);
+        double new_dist[N];
+        double new_square_err = 0;
+        DistancesToAllPoints(points1D, N, a + h[0], b + h[1], c + h[2], d + h[3], alph + h[4], bet + h[5], new_dist);
+        for (int i = 0; i < N; i++)
+        {
+            new_square_err += (new_dist[i] * new_dist[i]);
+        }
+        if (new_square_err >= square_err)
+        {
+            alpha = alpha / 10;
+        }
+        else
+        {
+            a += h[0];
+            b += h[1];
+            c += h[2];
+            d += h[3];
+            alph += h[4];
+            bet += h[5];
+            square_err = new_square_err;
+            for (int i = 0; i < N; i++)
+            {
+                dist[i] = new_dist[i];
+            }
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------
+
 double LambdaChange(double *points, int N, double &a, double &b, double &c, double &d, double &alph, double &bet, double &lambda, double &old_square_err, double *results)
 {
     double dist[N];
@@ -86,18 +156,17 @@ double LambdaChange(double *points, int N, double &a, double &b, double &c, doub
     }
     std::cerr << "SQUARE ERR " << square_err << std::endl;
     if (square_err >= old_square_err)
-        new_lambda = lambda * 2;
+        new_lambda = lambda * 10;
     else
     {
         std::cerr << "IMPROVEMENTS!";
-
         a += results[0];
         b += results[1];
         c += results[2];
         d += results[3];
         alph += results[4];
         bet += results[5];
-        new_lambda = lambda / 2;
+        new_lambda = lambda / 10;
         old_square_err = square_err;
     }
     std::cerr << "CHANGE IN RESULTS" << std::endl;
@@ -126,8 +195,9 @@ void LevenbergMarquardt(double points[][3], int N)
     std::mt19937_64 rng(seed);
     std::uniform_real_distribution<double> uniform(-2 * std::numbers::pi_v<double>, 2 * std::numbers::pi_v<double>);
     // double a = uniform(rng), b = uniform(rng), c = uniform(rng), d = uniform(rng), alph = uniform(rng), bet = uniform(rng);
-    double a = 8.2122, b = -4.79395, c = -16.40835, d = -8.207055, alph = -2.60384, bet = 2.13255;
-    // double a = 5.2122, b = -4.79395, c = -26, d = -4.207055, alph = -3.60384, bet = 1.13255;
+    // double a = 8.2122, b = -4.79395, c = -16.40835, d = -8.207055, alph = -2.60384, bet = 2.13255;
+    // double a = 5.2122, b = -4.79395, c = -26.40835, d = -4.207055, alph = -3.60384, bet = 1.13255;
+    double a = 5.2122, b = -4.79395, c = -26, d = -4.207055, alph = -3.60384, bet = 1.13255;
 
     double lambda = 1;
     double lambda_change = 1;
@@ -151,7 +221,7 @@ void LevenbergMarquardt(double points[][3], int N)
     while (true)
     {
 
-        if ((std::abs(lambda_change) < 0.05 && lambda_change < 0) || nr > 2000)
+        if (nr > 10)
             break;
 
         Jacobian(points, N, a, b, c, d, alph, bet, jacobian);
