@@ -4,7 +4,11 @@
 #include "rotations.h"
 #include "equations.h"
 #include "distance.h"
-
+double MyPrint(double nr)
+{
+	// std::cerr << "MyPrint" << nr << std::endl;
+	return nr;
+}
 inline void HelixPoint(double a, double b, double c, double d, double alph, double bet, double t, double output[3])
 {
 	double x = a * (c + std::cos(t));
@@ -30,6 +34,9 @@ inline double HelixClosestTime(double a, double b, double c, double d, double al
 	double B = std::atan2(-point[1], point[0]);
 	double C = b * b;
 	double D = -point[2] * b;
+
+	double asd = MyPrint(A);
+	double asdasd = MyPrint(B);
 
 	// PrintSinPlusLin(A, B, C, D);
 	double mi = point[2] / b - MY_PI;

@@ -107,22 +107,27 @@ void TestAddMatrices()
 }
 void TestGaussianElim()
 {
-    double left_side[6][6] = {
+    double left_side[36] = {
 
-        {2, 3, 1, 5, 7, 1},
+        2, 3, 1, 5, 7, 1, //
 
-        {4, 7, 2, 10, 14, 2},
+        4,
+        7, 2, 10, 14, 2, //
 
-        {1, 2, 2, 3, 5, 2},
+        1,
+        2, 2, 3, 5, 2, //
 
-        {3, 5, 4, 1, 6, 4},
+        3,
+        5, 4, 1, 6, 4, //
 
-        {5, 1, 3, 2, 1, 3},
+        5,
+        1, 3, 2, 1, 3, //
 
-        {2, 4, 6, 1, 3, 5}};
+        2,
+        4, 6, 1, 3, 5};
 
     double right_side[6] = {25, 53, 18, 31, 23, 40};
-    double output[6][6];
+    double output[36];
     double results[6];
     ForwardElim(left_side, right_side, output);
     std::cout << "right side " << std::endl;
@@ -146,9 +151,9 @@ void TestDistanceToPoint()
     double output[3];
     HelixPoint(a, b, c, d, alph, bet, t, output);
     std::cout << "Generated point " << output[0] << " " << output[1] << " " << output[2] << " " << std ::endl;
-    double x, y, z;
-    DistanceToPoint(a, b, c, d, alph, bet, t, x, y, z);
-    std::cout << "Distance to point " << x << " " << y << " " << z << std ::endl;
+    double x = output[0], y = output[1], z = output[2];
+    double dist = DistanceToPoint(a, b, c, d, alph, bet, x, y, z);
+    std::cout << "Distance to point on helix is: " << dist << std ::endl;
 }
 void TestDistancesToPoints()
 {
@@ -185,15 +190,8 @@ void TestDistancesToPoints()
     }
     std::cout << "done\n";
 }
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            std::cout << dist[i * 3 + j] << " ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "done";
-}
+
+
 
 int main()
 {
@@ -215,4 +213,5 @@ int main()
     TestDistanceToPoint();
     std::cout << "TestDistancesToAllPoint results: " << std::endl;
     TestDistancesToPoints();
+
 }
