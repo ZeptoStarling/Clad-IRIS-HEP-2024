@@ -97,64 +97,64 @@ inline void AddMatrices(double *a, double *b, int rows, int cols, double *output
     }
 }
 
-inline void swap_row(double *matrix, int i, int j)
+inline void swap_row(double *matrix, int size, int i, int j)
 {
     // 6x6
-    for (int k = 0; k < 6; k++)
+    for (int k = 0; k < size; k++)
     {
-        double temp = matrix[i * 6 + k];
-        matrix[i * 6 + k] = matrix[j * 6 + k];
-        matrix[j * 6 + k] = temp;
+        double temp = matrix[i * size + k];
+        matrix[i * size + k] = matrix[j * size + k];
+        matrix[j * size + k] = temp;
     }
 }
-inline void ForwardElim(double *input, double *res, double *output)
+inline void ForwardElim(double *input, int size, double *res, double *output)
 {
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < size; ++i)
     {
-        for (int j = 0; j < 6; ++j)
+        for (int j = 0; j < size; ++j)
         {
-            output[i * 6 + j] = input[i * 6 + j];
+            output[i * size + j] = input[i * size + j];
         }
     }
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < size; i++)
     {
         int i_max = i;
-        double v_max = output[i_max * 6 + i];
+        double v_max = output[i_max * size + i];
 
-        for (int j = i + 1; j < 6; j++)
-            if (std::abs(output[j * 6 + i]) > std::abs(v_max) && output[j * 6 + i] != 0)
-                v_max = output[j * 6 + i], i_max = j;
+        for (int j = i + 1; j < size; j++)
+            if (std::abs(output[j * size + i]) > std::abs(v_max) && output[j * size + i] != 0)
+                v_max = output[j * size + i], i_max = j;
         if (i_max != i)
         {
-            swap_row(output, i, i_max);
+            swap_row(output, size, i, i_max);
             double temp = res[i];
             res[i] = res[i_max];
             res[i_max] = temp;
         }
 
-        if (output[i * 6 + i] == 0.0)
+        if (output[i * size + i] == 0.0)
         {
             std::cerr << "Mathematical Error!";
             std::cerr << "Input that caused the error is:";
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < size; i++)
             {
-                for (int j = 0; j < 6; j++)
+                for (int j = 0; j < size; j++)
                 {
-                    std::cerr << output[i * 6 + j] << " ";
+                    std::cerr << output[i * size + j] << " ";
                 }
                 std::cerr << std::endl;
             }
         }
-        for (int j = i + 1; j < 6; j++)
+        for (int j = i + 1; j < size; j++)
         {
-            double ratio = output[j * 6 + i] / output[i * 6 + i];
+            double ratio = output[j * size + i] / output[i * size + i];
 
-            for (int k = 0; k < 6; k++)
+            for (int k = 0; k < size; k++)
             {
-                output[j * 6 + k] = output[j * 6 + k] - ratio * output[i * 6 + k];
-                if (std::abs(output[j * 6 + k]) <= 1e-15)
+                output[j * size + k] = output[j * size + k] - ratio * output[i * size + k];
+                if (std::abs(output[j * size + k]) <= 1e-15)
                 {
-                    output[j * 6 + k] = 0;
+                    output[j * size + k] = 0;
                 }
             }
             res[j] = res[j] - ratio * res[i];
@@ -168,52 +168,51 @@ inline void ForwardElim(double *input, double *res, double *output)
     // TO DO. Take this out
     std::cerr << "Forward elimination results:" << std::endl;
     std::cerr << "Left side:" << std::endl;
-    for (int j = 0; j < 6; j++)
+    for (int j = 0; j < size; j++)
     {
-        for (int k = 0; k < 6; k++)
+        for (int k = 0; k < size; k++)
         {
-            std::cerr << output[j * 6 + k] << " ";
+            std::cerr << output[j * size + k] << " ";
         }
         std::cerr << std::endl;
     }
     std::cerr << "Right side:" << std::endl;
-    for (int k = 0; k < 6; k++)
+    for (int k = 0; k < size; k++)
     {
         std::cerr << res[k] << " ";
     }
     std::cerr << std::endl;
 }
 
-void BackSub(double *input, double *right_side, double *results)
+void BackSub(double *input, int size, double *right_side, double *results)
 {
     /*Back substitution and the result of Gaussian elimination*/
-    for (int i = 5; i > -1; i--)
+    for (int i = (size - 1); i > -1; i--)
     {
         results[i] = right_side[i];
-        for (int j = 5; j > i; j--)
+        for (int j = (size - 1); j > i; j--)
         {
-            results[i] -= input[i * 6 + j] * results[j];
+            results[i] -= input[i * size + j] * results[j];
         }
-        results[i] /= input[i * 6 + i];
+        results[i] /= input[i * size + i];
         if (std::abs(results[i]) <= 1e-15)
         {
             results[i] = 0;
         }
     }
 }
-void CheckSolution(double *input, double *right_side, double *results)
+void CheckSolution(double *input, int size, double *right_side, double *results)
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < size; i++)
     {
         double sum = 0;
-        for (int j = 0; j < 6; j++)
+        for (int j = 0; j < size; j++)
         {
-            sum += input[i * 6 + j] * results[j];
+            sum += input[i * size + j] * results[j];
         }
         if (std::abs(sum - right_side[i]) >= 1e-5)
         {
             std::cerr << "Wrong solution " << sum << " " << right_side[i] << std::endl;
-            std::cerr << "Results: " << results[0] << " " << results[1] << " " << results[2] << " " << results[3] << " " << results[4] << " " << results[5] << " \n";
             std::abort();
         }
     }
