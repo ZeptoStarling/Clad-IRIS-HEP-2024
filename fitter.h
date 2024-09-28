@@ -64,42 +64,21 @@ void DistancesToAllPoints(double *points, int nr_of_points, double a, double b, 
 void Jacobian(double *points, int nr_of_points, double a, double b, double c, double d, double alph, double bet, double *Jacobian)
 {
     /*Construct the nr_of_points x 6 Jacobian.*/
-    // auto dist_grad = clad::gradient(DistanceToPoint, "a, c, d, alph, bet");
-    // dist_grad.dump();
-    // dist_grad.dump();
-    // double t = HelixClosestTime(a, b, c, d, alph, bet, points[0], points[1], points[2]);
-    // auto dist_time = clad::gradient(NextSinPlusInflection, "A, B");
-    // dist_time.dump();
-    auto dist_a = clad::differentiate(DistanceToPoint, "a");
-    auto dist_b = clad::differentiate(DistanceToPoint, "b");
-    auto dist_c = clad::differentiate(DistanceToPoint, "c");
-    auto dist_d = clad::differentiate(DistanceToPoint, "d");
-    auto dist_alph = clad::differentiate(DistanceToPoint, "alph");
-    auto dist_bet = clad::differentiate(DistanceToPoint, "bet");
-
+    auto dist_grad = clad::gradient(DistanceToPoint, "a, b, c, d, alph, bet");
     for (int i = 0; i < nr_of_points; i++)
     {
         double x = points[i * 3];
         double y = points[i * 3 + 1];
         double z = points[i * 3 + 2];
         double output[3];
-        // double da = 0, db = 0, dc = 0, dd = 0, dalph = 0, dbet = 0;
-        // dist_grad.execute(a, b, c, d, alph, bet, x, y, z, &da, &db, &dc, &dd, &dalph, &dbet);
-        // std::cerr << "given params " << " a " << a << "b" << b << " c " << c << " d " << d << " alph " << alph << " bet " << bet << std::endl;
-        double da = dist_a.execute(a, b, c, d, alph, bet, x, y, z);
-        double db = dist_b.execute(a, b, c, d, alph, bet, x, y, z);
-        double dc = dist_c.execute(a, b, c, d, alph, bet, x, y, z);
-        double dd = dist_d.execute(a, b, c, d, alph, bet, x, y, z);
-        double dalph = dist_alph.execute(a, b, c, d, alph, bet, x, y, z);
-        double dbet = dist_bet.execute(a, b, c, d, alph, bet, x, y, z);
-        double dist = DistanceToPoint(a, b, c, d, alph, bet, x, y, z);
+        double da = 0, db = 0, dc = 0, dd = 0, dalph = 0, dbet = 0;
+        dist_grad.execute(a, b, c, d, alph, bet, x, y, z, &da, &db, &dc, &dd, &dalph, &dbet);
         Jacobian[i * 6] = da;
         Jacobian[i * 6 + 1] = db;
         Jacobian[i * 6 + 2] = dc;
         Jacobian[i * 6 + 3] = dd;
         Jacobian[i * 6 + 4] = dalph;
         Jacobian[i * 6 + 5] = dbet;
-        // std::cerr << "dist " << dist << " da " << da << " db " << db << " dc " << dc << " dd " << dd << " dalph " << dalph << " dbet " << dbet << std::endl;
     }
 }
 
@@ -262,7 +241,7 @@ void LevenbergMarquardt(double *points, int nr_of_points)
         //     break;
 
         Jacobian(points, nr_of_points, a, b, c, d, alph, bet, jacobian);
-        // PrintMatrix("jacobian", jacobian, nr_of_points, 5);
+        // PrintMatrix("jacobian", jacobian, nr_of_points, 6);
 
         Transpose(jacobian, nr_of_points, diff_params, tjacobian);
 
@@ -285,10 +264,10 @@ void LevenbergMarquardt(double *points, int nr_of_points)
         double forward_elim[diff_params * diff_params];
         double unchanged_rs[diff_params];
         CopyMatrix(right_side, diff_params, unchanged_rs);
-        PrintMatrix("left_side", left_side, diff_params, diff_params);
-        PrintMatrix("right_side", unchanged_rs, 1, diff_params);
+        // PrintMatrix("left_side", left_side, diff_params, diff_params);
+        // PrintMatrix("right_side", unchanged_rs, 1, diff_params);
         ForwardElim(left_side, diff_params, right_side, forward_elim);
-        PrintMatrix("right_side", right_side, 1, diff_params);
+        // PrintMatrix("right_side", right_side, 1, diff_params);
         BackSub(forward_elim, diff_params, right_side, results);
         CheckSolution(left_side, diff_params, unchanged_rs, results);
         lambda = Lambda(points, nr_of_points, a, b, c, d, alph, bet, lambda, old_square_err, results);

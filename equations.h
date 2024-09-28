@@ -88,8 +88,15 @@ double PrevValPiK(double offs, double x)
 double NextSinPlusInflection(double A, double B, double C, double x)
 {
 	// cos(x + B) = -C / A
-	double inv = std::acos(-C / A);
-	return std::min(NextValPiK(inv - B, x), NextValPiK(-inv - B, x));
+	if (-C / A >= -1 && -C / A <= 1)
+	{
+		double inv = std::acos(-C / A);
+		return std::min(NextValPiK(inv - B, x), NextValPiK(-inv - B, x));
+	}
+	else
+	{
+		return 1000000000;
+	}
 }
 
 // A cos(x + B) + C = 0
