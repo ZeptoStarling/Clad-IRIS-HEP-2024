@@ -3,20 +3,17 @@
 #include <cmath>
 #include <cassert>
 
+auto MY_PI = std::numbers::pi_v<double>;
+
 double EvaluateSinPlusLin(double A, double B, double C, double D, double x)
 {
+	/*When this equation is equal to zero, the distance between the point and the helix is the shortest.*/
 	return A * std::sin(x + B) + C * x + D;
 }
 
-void PrintSinPlusLin(double A, double B, double C, double D)
-{
-	std::cerr << A << " * sin(x + " << B << ") + " << C << " * x + " << D << " = 0\n";
-}
-
-// A sin (x + B) + C x + D = 0
-// double SolveSinPlusLin(double A, double B, double C, double D, double mi = -1000000, double ma = 1000000)
 double SolveSinPlusLin(double A, double B, double C, double D, double mi, double ma)
 {
+	/*Binary search to determine x, with which EvaluateSinPlusLin equation equals zero.*/
 	for (int i = 0; i < 100; i++)
 	{
 		double mid = (mi + ma) / 2;
@@ -42,8 +39,6 @@ double SolveSinPlusLin(double A, double B, double C, double D, double mi, double
 		}
 		else
 		{
-			// random
-			// std::cerr << "Wrong\n";
 			break;
 			mi = mid;
 		}
@@ -80,13 +75,13 @@ double NextValPiK(double offs, double x)
 
 double PrevValPiK(double offs, double x)
 {
-	auto MY_PI = std::numbers::pi_v<double>;
 	return NextValPiK(offs, x) - 2 * MY_PI;
 }
 
 // A cos(x + B) + C = 0
 double NextSinPlusInflection(double A, double B, double C, double x)
 {
+	/* Identifies the next inflection point of the sine curve.*/
 	// cos(x + B) = -C / A
 	if (-C / A >= -1 && -C / A <= 1)
 	{

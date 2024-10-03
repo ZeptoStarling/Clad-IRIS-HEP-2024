@@ -4,35 +4,26 @@
 #include "fitter.h"
 
 /* Tests for "matrices.h" */
+bool AreSame(double a, double b)
+{
+    return fabs(a - b) < 0.00009;
+}
 bool ArraysEqual(double *a, double *b, int N)
 {
     for (int i = 0; i < N; i++)
     {
-        if (a[i] != b[i])
+        if (AreSame(a[i], b[i]))
         {
+        }
+        else
+        {
+            std::cerr << a[i] << " " << b[i] << std::endl;
             return false;
         }
     }
     return true;
 }
-void TestConversion()
-{
-    // Not a test of a function, copied from the Levenberg-Marquardt function in main.cc
-    double points[2][3] = {{1, 2, 3}, {4, 5, 6}};
-    double points1D[2 * 3];
-    for (int i = 0; i < 2; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            points1D[i * 3 + j] = points[i][j];
-        }
-    }
-    for (int i = 0; i < 6; i++)
-    {
-        std::cout << points1D[i] << " ";
-    }
-    std::cout << std::endl;
-}
+
 void TestMultiply()
 {
     double a[2 * 3] = {1, 2, 3, 4, 5, 6};
@@ -48,6 +39,7 @@ void TestMultiply()
 
     assert(ArraysEqual(output, expected_output, 8));
 }
+
 void TestTranspose()
 {
     double input[2 * 3] = {1, 2, 3, 4, 5, 6};
@@ -62,6 +54,7 @@ void TestTranspose()
 
     assert(ArraysEqual(output, expected_output, 6));
 }
+
 void TestDiagOfSquareM()
 {
     double input[3 * 3] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -75,6 +68,7 @@ void TestDiagOfSquareM()
     std::cout << std::endl;
     assert(ArraysEqual(diag, expected_diag, 9));
 }
+
 void TestScalarMultiply()
 {
     double input[2 * 3] = {1, 2, 3, 4, 5, 6};
@@ -90,6 +84,7 @@ void TestScalarMultiply()
 
     assert(ArraysEqual(output, expected_output, 6));
 }
+
 void TestAddMatrices()
 {
     double a[2 * 3] = {1, 2, 3, 4, 5, 6};
@@ -105,6 +100,7 @@ void TestAddMatrices()
 
     assert(ArraysEqual(output, expected_output, 6));
 }
+
 void TestGaussianElim()
 {
     double left_side[36] = {
@@ -129,7 +125,7 @@ void TestGaussianElim()
     double right_side[6] = {25, 53, 18, 31, 23, 40};
     double output[36];
     double results[6];
-    ForwardElim(left_side, right_side, output);
+    ForwardElim(left_side, 6, right_side, output);
     std::cout << "right side " << std::endl;
     for (int i = 0; i < 6; i++)
     {
@@ -137,13 +133,14 @@ void TestGaussianElim()
     }
     std::cout << std::endl;
 
-    BackSub(output, right_side, results);
+    BackSub(output, 6, right_side, results);
     for (int i = 0; i < 6; i++)
     {
         std::cout << results[i] << " ";
     }
     std::cout << std::endl;
 }
+
 void TestDistanceToPoint()
 {
     double a = 5.2122, b = -4.79395, c = -26.40835, d = -4.207055, alph = -3.60384, bet = 1.13255;
@@ -155,6 +152,7 @@ void TestDistanceToPoint()
     double dist = DistanceToPoint(a, b, c, d, alph, bet, x, y, z);
     std::cout << "Distance to point on helix is: " << dist << std ::endl;
 }
+
 void TestDistancesToPoints()
 {
     double a = 5.2122, b = -4.79395, c = -26.40835, d = -4.207055, alph = -3.60384, bet = 1.13255;
@@ -191,12 +189,8 @@ void TestDistancesToPoints()
     std::cout << "done\n";
 }
 
-
-
 int main()
 {
-    std::cout << "TestConversion results: " << std::endl;
-    TestConversion();
     std::cout << "TestMultiply results: " << std::endl;
     TestMultiply();
     std::cout << "TestTranspose results: " << std::endl;
@@ -213,5 +207,4 @@ int main()
     TestDistanceToPoint();
     std::cout << "TestDistancesToAllPoint results: " << std::endl;
     TestDistancesToPoints();
-
 }

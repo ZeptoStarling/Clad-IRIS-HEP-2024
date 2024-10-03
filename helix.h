@@ -4,13 +4,10 @@
 #include "rotations.h"
 #include "equations.h"
 #include "distance.h"
-double MyPrint(double nr)
-{
-	// std::cerr << "MyPrint" << nr << std::endl;
-	return nr;
-}
+
 inline void HelixPoint(double a, double b, double c, double d, double alph, double bet, double t, double output[3])
 {
+	/*Describe a point on a helix in the Cartesian coordinate system.*/
 	double x = a * (c + std::cos(t));
 	double y = a * (d + std::sin(t));
 	double z = a * b * t;
@@ -22,6 +19,7 @@ inline void HelixPoint(double a, double b, double c, double d, double alph, doub
 
 inline double HelixClosestTime(double a, double b, double c, double d, double alph, double bet, double x, double y, double z)
 {
+	/*Calculate t, during which a helix with given params is the closest to a given point.*/
 	auto MY_PI = std::numbers::pi_v<double>;
 	double point[3];
 	UnRotate(x, y, z, alph, bet, point);
@@ -35,10 +33,6 @@ inline double HelixClosestTime(double a, double b, double c, double d, double al
 	double C = b * b;
 	double D = -point[2] * b;
 
-	double asd = MyPrint(A);
-	double asdasd = MyPrint(B);
-
-	// PrintSinPlusLin(A, B, C, D);
 	double mi = point[2] / b - MY_PI;
 	double ma = point[2] / b + MY_PI;
 	double t1 = SolveSinPlusLin(A, B, C, D, mi, ma);
