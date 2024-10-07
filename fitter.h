@@ -132,10 +132,10 @@ double Lambda(double *points, int nr_of_points, double &a, double &b, double &c,
     }
     return new_lambda;
 }
-void LevenbergMarquardt(double *points, int nr_of_points, double true_b)
+void LevenbergMarquardt(double *points, int nr_of_points, double true_b, double &a, double &b, double &c, double &d, double &alph, double &bet)
 /*Use the Levenberg-Marquardt algorithm to fit a helix on a given set of points. Currently produces all of the parameters of the helix, except b.*/
 {
-    double a = 6.2122, b = 0.1, c = 1.9835, d = 1.707055, alph = -3.60384, bet = 1.13255; // currently breaks if the parameters are exact as the ones used for (noise free) generated points
+    a = 6.2122, b = 0.1, c = 1.9835, d = 1.707055, alph = -3.60384, bet = 1.13255; // currently breaks if the parameters are exact as the ones used for (noise free) generated points
 
     int diff_params = 6;
     double lambda = 1;
@@ -191,11 +191,12 @@ void LevenbergMarquardt(double *points, int nr_of_points, double true_b)
     }
 
     double t = 0;
+    b = true_b;
     for (int i = 0; i < nr_of_points; i++)
     {
         t += 0.1;
         double output[3];
-        HelixPoint(a, true_b, c, d, alph, bet, t, output);
+        HelixPoint(a, b, c, d, alph, bet, t, output);
         double x = output[0], y = output[1], z = output[2];
 
         std::cout << x << " " << y << " " << z << "\n";
